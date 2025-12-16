@@ -11,6 +11,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Http;
 use Midtrans\Config;
 use Midtrans\Snap;
+use App\Models\Shipment;
 
 class CheckoutController extends Controller
 {
@@ -160,9 +161,9 @@ class CheckoutController extends Controller
         // Simpan order
         $order = Order::create([
             'user_id' => Auth::id(),
-            'province_name' => $request->destination['province_name'],
-            'city_name' => $request->destination['city_name'],
-            'district_name' => $request->destination['district_name'],
+            'province_id' => $request->destination['province_name'],
+            'city_id' => $request->destination['city_name'],
+            'district_id' => $request->destination['district_name'],
             'zip_code' => $request->destination['zip_code'] ?? null,
             'total_price' => $total_price,
             'shipping_cost' => $shipping_cost,
@@ -205,6 +206,13 @@ class CheckoutController extends Controller
             'transaction_status' => 'pending',
             'gross_amount' => $total_price + $shipping_cost
         ]);
+
+        Shipment::create([
+    'order_id' => $order->id,
+    'courier' => strtolower($courier), // wajib lowercase utk RajaOngkir
+    'tracking_number' => null,
+    'status' => 'packed',
+]);
 
         session()->forget('cart');
 
